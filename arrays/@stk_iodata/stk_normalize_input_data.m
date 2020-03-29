@@ -1,8 +1,8 @@
-% STK_MAKE_KREQ [STK internal]
+% STK_NORMALIZE_INPUT_DATA ...
 
 % Copyright Notice
 %
-%    Copyright (C) 2017, 2020 CentraleSupelec
+%    Copyright (C) 2020 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,13 +26,8 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function kreq = stk_make_kreq (M_post, x)
+function data = stk_normalize_input_data (data, varargin)
 
-% Create prior cross-covariance matrix (and design matrix at x)
-[Kti, Pt] = stk_make_matcov (M_post.prior_model, x, M_post.data);
-
-% Create full kriging equation object
-kreq = stk_set_righthandside (M_post.kreq, Kti, Pt);
+data.input_data = stk_normalize (data.input_data, varargin{:});
 
 end % function
-

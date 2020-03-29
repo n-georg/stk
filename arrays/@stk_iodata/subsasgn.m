@@ -1,8 +1,8 @@
-% STK_MAKE_KREQ [STK internal]
+% SUBSASGN [overload base function]
 
 % Copyright Notice
 %
-%    Copyright (C) 2017, 2020 CentraleSupelec
+%    Copyright (C) 2018 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,13 +26,23 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function kreq = stk_make_kreq (M_post, x)
+function data = subsasgn (data, idx, value)
 
-% Create prior cross-covariance matrix (and design matrix at x)
-[Kti, Pt] = stk_make_matcov (M_post.prior_model, x, M_post.data);
-
-% Create full kriging equation object
-kreq = stk_set_righthandside (M_post.kreq, Kti, Pt);
+switch idx(1).type
+    
+    case '.'
+        
+        if length (idx) > 1
+            value = subsasgn (get (data, idx(1).subs), idx(2:end), value);
+        end
+        
+        data = set (data, idx(1).subs, value);
+        
+    case {'{}', '()'}
+        
+        errmsg = 'Illegal assignment';
+        stk_error (errmsg, 'IllegalAssignment');
+        
+end
 
 end % function
-

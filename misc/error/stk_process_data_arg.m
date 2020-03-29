@@ -1,8 +1,8 @@
-% STK_MAKE_KREQ [STK internal]
+% ...
 
 % Copyright Notice
 %
-%    Copyright (C) 2017, 2020 CentraleSupelec
+%    Copyright (C) 2020 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,13 +26,32 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function kreq = stk_make_kreq (M_post, x)
+function [data, varargin] = stk_process_data_arg (nargin_extra, arg1, varargin)
 
-% Create prior cross-covariance matrix (and design matrix at x)
-[Kti, Pt] = stk_make_matcov (M_post.prior_model, x, M_post.data);
+if nargin < 2
+    stk_error ('Not enough input arguments.', 'NotEnoughInputArgs');
+end
 
-% Create full kriging equation object
-kreq = stk_set_righthandside (M_post.kreq, Kti, Pt);
+if isa (arg1, 'stk_iodata')
+    
+    if nargin > 2 + nargin_extra
+        stk_error ('Too many input arguments.', 'TooManyInputArgs');
+    end
+    
+    data = arg1;
+    
+else
+    
+    if nargin > 3 + nargin_extra
+        stk_error ('Too many input arguments.', 'TooManyInputArgs');
+    end
+    
+    data = stk_iodata (arg1, varargin{1});
+    varargin(1) = [];
+    
+end
 
+n_missing = nargin_extra - length (varargin);
+varargin = [varargin cell(1, n_missing)];
+        
 end % function
-

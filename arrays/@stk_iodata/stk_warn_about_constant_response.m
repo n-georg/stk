@@ -1,8 +1,8 @@
-% STK_MAKE_KREQ [STK internal]
+% ...
 
 % Copyright Notice
 %
-%    Copyright (C) 2017, 2020 CentraleSupelec
+%    Copyright (C) 2020 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,13 +26,16 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function kreq = stk_make_kreq (M_post, x)
+function warn = stk_warn_about_constant_response (data)
 
-% Create prior cross-covariance matrix (and design matrix at x)
-[Kti, Pt] = stk_make_matcov (M_post.prior_model, x, M_post.data);
+% FIXME: XXX = ?
 
-% Create full kriging equation object
-kreq = stk_set_righthandside (M_post.kreq, Kti, Pt);
+warn = (std (stk_get_output_data (data)) == 0);
+
+if warn
+    warning ('STK:XXX:ConstantResponse', ['Constant-' ...
+        'response data: the output of XXX is likely ' ...
+        'to be unreliable.']);
+end
 
 end % function
-

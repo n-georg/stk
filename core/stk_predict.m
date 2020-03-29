@@ -1,10 +1,12 @@
 % STK_PREDICT performs a kriging prediction
 %
 % CALL: ZP = stk_predict (MODEL, XP)
+% CALL: ZP = stk_predict (MODEL, DATA, XP)
 % CALL: ZP = stk_predict (MODEL, XI, ZI, XP)
 %
 %    performs a kriging prediction at the points XP, given the MODEL and,
-%    if available, the data (XI, ZI).
+%    if available, additional data provided as a single DATA agument or
+%    as apair (XI, ZI).
 %
 %    The MODEL argument can be either a prior model structure (as provided
 %    by stk_model) or a model object (for instance, a posterior model
@@ -12,6 +14,11 @@
 %    a posterior object and some additional data (XI, ZI) is provided, the
 %    model is first updated with the data before the prediction is actually
 %    carried out.
+%
+%    The DATA argument, in the second calling syntax, is expected to be an
+%    stk_iodata object.  Given separate input/output arguments XI an ZI,
+%    using the fourth calling syntax is equivalent to using a DATA argument
+%    equal to stk_iodata (XI, ZI).
 %
 %    The input arguments XI, ZI, and XP can be either numerical matrices or
 %    dataframes. More precisely, on an input space of dimension DIM,
@@ -89,7 +96,6 @@ switch nargin
         x_prd = varargin{1};
         
     case 3  % CALL: [...] = stk_predict (MODEL, DATA, X_PRD)
-        stk_error ('This syntax is not implemented yet.', 'NotImplemented');
         model = stk_model_gpposterior (model, varargin{1});
         x_prd = varargin{2};
         

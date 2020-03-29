@@ -1,8 +1,8 @@
-% STK_MAKE_KREQ [STK internal]
+% SUBSREF [overload base function]
 
 % Copyright Notice
 %
-%    Copyright (C) 2017, 2020 CentraleSupelec
+%    Copyright (C) 2018 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,13 +26,20 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function kreq = stk_make_kreq (M_post, x)
+function value = subsref (data, idx)
 
-% Create prior cross-covariance matrix (and design matrix at x)
-[Kti, Pt] = stk_make_matcov (M_post.prior_model, x, M_post.data);
-
-% Create full kriging equation object
-kreq = stk_set_righthandside (M_post.kreq, Kti, Pt);
+if strcmp (idx(1).type, '.')
+    
+    value = get (data, idx(1).subs);
+    
+    if length (idx) > 1
+        value = subsref (value, idx(2:end));
+    end
+    
+else
+    
+    stk_error ('Illegal indexing.', 'IllegalIndexing');
+    
+end
 
 end % function
-

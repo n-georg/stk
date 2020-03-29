@@ -28,6 +28,6 @@
 
 function n = stk_get_sample_size (model)
 
-n = size (model.input_data, 1);
+n = stk_get_sample_size (model.data);
 
 end % function
