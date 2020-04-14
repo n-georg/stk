@@ -1,4 +1,6 @@
-% STK_GET_INTPUT_DATA returns the input data of the model
+% @STK_MODEL_GPPOSTERIOR/STK_GET_INPUT_DATA [overload STK function]
+%
+% See also: stk_get_input_data
 
 % Copyright Notice
 %
