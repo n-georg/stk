@@ -1,4 +1,6 @@
-% STK_GET_OUTPUT_DATA returns the output data of the model
+% @STK_MODEL_GPPOSTERIOR/STK_GET_OUTPUT_DATA [overload STK function]
+%
+% See also: stk_get_output_data
 
 % Copyright Notice
 %

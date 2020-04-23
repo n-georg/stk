@@ -4,7 +4,7 @@
 
 % Copyright Notice
 %
-%    Copyright (C) 2015, 2016, 2020 CentraleSupelec
+%    Copyright (C) 2020 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
