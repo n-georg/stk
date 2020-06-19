@@ -1,4 +1,4 @@
-% @STK_IODATA/STK_GET_INPUT_DIM [overload STK function]
+% @STK_MODEL_GPPOSTERIOR/STK_GET_INPUT_DIM [overload STK function]
 %
 % See also: stk_get_input_dim
 
@@ -28,8 +28,8 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function x = stk_get_input_dim (data)
+function input_data = stk_get_input_dim (model)
 
-x = data.input_dim;
+input_data = stk_get_input_dim (model.data);
 
 end % function

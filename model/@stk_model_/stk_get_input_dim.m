@@ -1,4 +1,4 @@
-% @STK_IODATA/STK_GET_INPUT_DIM [overload STK function]
+% @STK_MODEL_/STK_GET_INPUT_DIM [overload STK function]
 %
 % See also: stk_get_input_dim
 
@@ -28,8 +28,10 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function x = stk_get_input_dim (data)
+function input_dim = stk_get_input_dim (model)  %#ok<INUSD>
 
-x = data.input_dim;
+% DESIGN NOTE: cf. stk_get_prior_model.m
+
+input_dim = nan;
 
 end % function
