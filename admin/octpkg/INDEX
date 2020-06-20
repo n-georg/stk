@@ -144,7 +144,6 @@ Posterior model objects
  @stk_model_gpposterior/stk_model_update
 #@stk_model_gpposterior/stk_covmat_noise                      [overload STK]
 #@stk_model_gpposterior/stk_isnoisy                           [overload STK]
-#@stk_model_gpposterior/stk_generate_samplepaths              [overload STK]
 #@stk_model_gpposterior/stk_get_observation_variances         [overload STK]
 #@stk_model_gpposterior/stk_get_optimizable_parameters        [overload STK]
 #@stk_model_gpposterior/stk_set_optimizable_parameters        [overload STK]
