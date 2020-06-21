@@ -1,6 +1,17 @@
-% @STK_IODATA/STK_GET_OUTPUT_DIM [overload STK function]
+% STK_GET_OUTPUT_DIM returns the output dimension of a model or stk_iodata object
 %
-% See also: stk_get_output_dim
+% CALL: OUTPUT_DIM = stk_get_output_dim (MODEL)
+%
+%    returns the output dimension OUTPUT_DIM of the MODEL.  (Currently, only
+%    one-dimensional models are supported in STK, but this might change in
+%    the future.)
+%
+% CALL: OUTPUT_DIM = stk_get_output_dim (DATA)
+%
+%    returns the output dimension INPUT_DIM of the stk_iodata object DATA,
+%    i.e. the number of variables in the output data.
+%
+% See also: stk_get_output_data, stk_get_input_dim
 
 % Copyright Notice
 %
@@ -28,8 +39,10 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function x = stk_get_output_dim (data)
+function output_dim = stk_get_output_dim (model)
 
-x = data.output_dim;
+stk_assert_model_struct (model);
+
+output_dim = 1;
 
 end % function

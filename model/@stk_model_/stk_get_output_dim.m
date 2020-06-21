@@ -1,4 +1,4 @@
-% @STK_IODATA/STK_GET_OUTPUT_DIM [overload STK function]
+% @STK_MODEL_/STK_GET_OUTPUT_DIM [overload STK function]
 %
 % See also: stk_get_output_dim
 
@@ -28,8 +28,8 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function x = stk_get_output_dim (data)
+function output_dim = stk_get_output_dim (model)  %#ok<INUSD>
 
-x = data.output_dim;
+output_dim = 1;
 
 end % function

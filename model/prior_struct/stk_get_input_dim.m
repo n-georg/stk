@@ -9,7 +9,7 @@
 %    returns the input dimension INPUT_DIM of the stk_iodata object DATA,
 %    i.e. the number of variables in the input data.
 %
-% See also: stk_get_output_dim
+% See also: stk_get_input_data, stk_get_output_dim
 
 % Copyright Notice
 %
