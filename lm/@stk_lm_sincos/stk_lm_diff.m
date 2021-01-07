@@ -1,8 +1,8 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_LM_DIFF [overload STK function]
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +26,20 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function [V, lm] = stk_lm_diff (lm, x, diff)
 
-K = stk_covmat_noise (model.prior, varargin{:});
+if diff == 1  % diff wrt theta = log (angular_frequency)
+    
+    u = lm.angular_frequency * x;
+    V = [u .* cos(u), - u .* sin(u)];
+    
+else
+    
+    stk_error ('Incorrect value of the diff argument', 'InvalidArgument');
+    
+end
+
+% NOTE/FIXME: We could save u, sin(u) and cos(u) at eval time
+%   (we currently this would be useless since STK would not use it)
 
 end % function
-
-%#ok<*INUSD,*STOUT>

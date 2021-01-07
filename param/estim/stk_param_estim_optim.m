@@ -7,7 +7,7 @@
 
 % Copyright Notice
 %
-%    Copyright (C) 2015-2020 CentraleSupelec
+%    Copyright (C) 2015-2021 CentraleSupelec
 %    Copyright (C) 2014 Ashwin Ravisankar
 %    Copyright (C) 2011-2014 SUPELEC
 %
@@ -36,27 +36,25 @@
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
 function [model_opt, info] = stk_param_estim_optim ...
-    (model0, xi, zi, criterion, covparam_select, noiseparam_select)
-
-select = [covparam_select; noiseparam_select];
+    (model0, xi, zi, criterion, select)
 
 % Starting point
 v0 = stk_get_optimizable_parameters (model0);
 w0 = v0(select);
 
 % Bounds
-% FIXME: this could (should) be implemented directly for models
-[covparam_lb, covparam_ub] = stk_param_getdefaultbounds (model0.covariance_type, model0.param, xi, zi);
-[covparam_lb, covparam_ub] = select_bounds (covparam_lb, covparam_ub, covparam_select);
-[noiseparam_lb, noiseparam_ub] = stk_param_getdefaultbounds_lnv (model0, model0.lognoisevariance, xi, zi);
-[noiseparam_lb, noiseparam_ub] = select_bounds (noiseparam_lb, noiseparam_ub, noiseparam_select);
-lb = [covparam_lb; noiseparam_lb];
-ub = [covparam_ub; noiseparam_ub];
+[lb, ub] = stk_param_getdefaultbounds (model0, xi, zi);
+lb = lb(select);
+ub = ub(select);
+
+% Sanity checks
+assert (isequal (size (lb), size (w0)));
+assert (isequal (size (ub), size (w0)));
 
 % Define objective function
-f = @(v)(crit_wrapper (model0, v, xi, zi, criterion, covparam_select, noiseparam_select));
+f = @(v)(crit_wrapper (model0, v, xi, zi, criterion, select));
 
-bounds_available = (~ isempty (lb)) && (~ isempty (ub));
+finite_bounds_available = ~((any (lb == -inf) || any (ub == +inf)));
 
 % Sanity check
 crit0 = f (w0);
@@ -65,7 +63,7 @@ if ~ (isscalar (crit0) && isfinite (crit0))
     stk_error (errmsg, 'OptimizationFailure');
 end
 
-if bounds_available
+if finite_bounds_available
     A = stk_options_get ('stk_param_estim', 'minimize_box');
     [w_opt, crit_opt] = stk_minimize_boxconstrained (A, f, w0, lb, ub);
 else
@@ -93,8 +91,7 @@ if nargout > 1
     info.final_point = w_opt;
     info.lower_bounds = lb;
     info.upper_bounds = ub;
-    info.param_select = covparam_select;
-    info.noiseparam_select = noiseparam_select;
+    info.select = select;
 end
 
 end % function
@@ -102,11 +99,10 @@ end % function
 %#ok<*CTCH,*LERR,*SPWRN,*WNTAG>
 
 
-function [C, dC] = crit_wrapper ...
-    (model, w, xi, zi, criterion, covparam_select, noise_select)
+function [C, dC] = crit_wrapper (model, w, xi, zi, criterion, select)
 
 v = stk_get_optimizable_parameters (model);
-v([covparam_select; noise_select]) = w;
+v(select) = w;
 model = stk_set_optimizable_parameters (model, v);
 
 if nargout == 1
@@ -114,35 +110,14 @@ if nargout == 1
     % Compute only the value of the criterion
     C = criterion (model, xi, zi);
     
-elseif any (noise_select)
-    
-    % Compute the value of the criterion and the gradients
-    % FIXME: We might be computing a lot of derivatives that we don't really need...
-    [C, dC_param, dC_lnv] = criterion (model, xi, zi);
-    
-    dC = [dC_param(covparam_select); dC_lnv(noise_select)];
-    
 else
     
     % Compute the value of the criterion and the gradients
     % FIXME: We might be computing a lot of derivatives that we don't really need...
-    [C, dC_param] = criterion (model, xi, zi);
+    [C, C_grad] = criterion (model, xi, zi);
     
-    dC = dC_param(covparam_select);
+    dC = C_grad(select);
     
-end
-
-end % function
-
-
-function [lb, ub] = select_bounds (lb, ub, select)
-
-if ~ isempty (lb)
-    lb = lb(select);
-end
-
-if ~ isempty (ub)
-    ub = ub(select);
 end
 
 end % function

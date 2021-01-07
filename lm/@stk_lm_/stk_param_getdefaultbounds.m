@@ -1,8 +1,8 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_PARAM_GETDEFAULTBOUNDS [overload STK function]
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +26,19 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function [lb, ub] = stk_param_getdefaultbounds ...
+    (model, xi, zi)  %#ok<STOUT,INUSD>
 
-K = stk_covmat_noise (model.prior, varargin{:});
+if isa (lm, 'stk_lm_')
+    
+    stk_error (['Classes derived from stk_lm_ must ' ...
+        'implement stk_param_getdefaultbounds.'], ...
+        'IncompleteClassImplementation');
+    
+else
+    
+    stk_error ('Syntax error', 'SyntaxError');
+    
+end
 
 end % function
-
-%#ok<*INUSD,*STOUT>

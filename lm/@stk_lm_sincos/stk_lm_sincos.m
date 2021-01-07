@@ -1,8 +1,10 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_LM_SINCOS creates a 'sin+cos' linear model object
+%
+% TODO: document me!
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +28,33 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function lm = stk_lm_sincos (omega, omega_lims)
 
-K = stk_covmat_noise (model.prior, varargin{:});
+if nargin == 0
+    
+    lm = struct (                    ...
+        'angular_frequency',  1.0,   ...
+        'param',              0.0,   ...
+        'param_min',          -inf,  ...
+        'param_max',          +inf   );
+    
+else
+    
+    % FIXME: Check input size and type
+    
+    assert (omega_lims(1) <= omega_lims(2));
+    
+    lm = struct (                                   ...
+        'angular_frequency',  omega,                ...
+        'param',              log (omega),          ...
+        'param_min',          log (omega_lims(1)),  ...
+        'param_max',          log (omega_lims(2))   );
+    
+end
 
-end % function
+lm = class (lm, 'stk_lm_sincos', stk_lm_ ());
 
-%#ok<*INUSD,*STOUT>
+end  % function
+
+
+%!test stk_test_class ('stk_lm_sincos')

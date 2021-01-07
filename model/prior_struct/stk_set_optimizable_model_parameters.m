@@ -1,4 +1,4 @@
-% STK_SET_OPTIMIZABLE_PARAMETERS [STK internal]
+% STK_SET_OPTIMIZABLE_MODEL_PARAMETERS [STK internal]
 %
 % INTERNAL FUNCTION WARNING:
 %
@@ -10,7 +10,7 @@
 
 % Copyright Notice
 %
-%    Copyright (C) 2017, 2018 CentraleSupelec
+%    Copyright (C) 2017, 2018, 2021 CentraleSupelec
 %    Copyright (C) 2017 LNE
 %
 %    Authors:  Remi Stroh   <remi.stroh@lne.fr>
@@ -39,6 +39,11 @@
 function model = stk_set_optimizable_model_parameters (model, value)
 
 stk_assert_model_struct (model);
+model = stk_model_fixlm (model);
+
+% Linear model parameters
+lmparam = stk_get_optimizable_parameters (model.lm);
+lmparam_size = length (lmparam);
 
 % Covariance parameters
 covparam = stk_get_optimizable_parameters (model.param);
@@ -48,7 +53,7 @@ covparam_size = length (covparam);
 noiseparam = stk_get_optimizable_noise_parameters (model);
 noiseparam_size = length (noiseparam);
 
-total_size = covparam_size + noiseparam_size;
+total_size = lmparam_size + covparam_size + noiseparam_size;
 
 % Check length of value
 if numel (value) ~= total_size
@@ -56,15 +61,21 @@ if numel (value) ~= total_size
         'the number of parameters.'], 'IncorrectSize');
 end
 
+% Change linear parameter
+if lmparam_size > 0
+    lmparam = value(1:lmparam_size);
+    model.lm = stk_set_optimizable_parameters (model.lm, lmparam);
+end
+
 % Change covariance parameter
 if covparam_size > 0
-    covparam = value(1:covparam_size);
+    covparam = value(lmparam_size + (1:covparam_size));
     model.param = stk_set_optimizable_parameters (model.param, covparam);
 end
 
 % Change noise variance parameter
 if noiseparam_size > 0
-    noiseparam = value(covparam_size + (1:noiseparam_size));
+    noiseparam = value(lmparam_size + covparam_size + (1:noiseparam_size));
     model.lognoisevariance = stk_set_optimizable_parameters ...
         (model.lognoisevariance, noiseparam);
 end

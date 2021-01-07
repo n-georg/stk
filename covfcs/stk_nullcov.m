@@ -1,8 +1,10 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_NULLCOV ...
+%
+% FIXME: Document me!
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +28,25 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function K = stk_nullcov (param, x1, x2, diff, pairwise)  %#ok<INUSL>
 
-K = stk_covmat_noise (model.prior, varargin{:});
+% Number of evaluations points
+n1 = size (x1, 1);
+if (nargin > 2) && (~ isempty (x2))
+    n2 = size (x2, 1);
+else
+    n2 = n1;
+end
+
+% Default value for 'pairwise' (arg #5): false
+pairwise = (nargin > 4) && pairwise;
+assert ((n1 == n2) || (~ pairwise));
+
+% Return a matrix of zeros
+if pairwise
+    K = zeros (n1, 1);
+else
+    K = zeros (n1, n2);
+end
 
 end % function
-
-%#ok<*INUSD,*STOUT>

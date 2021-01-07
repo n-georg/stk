@@ -62,6 +62,11 @@ if isstruct (arg1)
         
     end
     
+elseif isa (arg1, 'function_handle')
+    
+    % Function handles can be used instead of lm objects
+    value = [];
+    
 else
     
     if isnumeric (arg1)

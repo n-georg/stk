@@ -1,8 +1,11 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_LM_NOPARAM_ [internal]
+%
+% Base class for linear model objects w/o hyper-parameters.
+%
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +29,11 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function lm = stk_lm_noparam_ ()
 
-K = stk_covmat_noise (model.prior, varargin{:});
+lm = class (struct (), 'stk_lm_noparam_', stk_lm_ ());
 
 end % function
 
-%#ok<*INUSD,*STOUT>
+
+%!test stk_test_class ('stk_lm_noparam_')

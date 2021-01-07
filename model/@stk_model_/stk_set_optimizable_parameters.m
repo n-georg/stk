@@ -1,8 +1,10 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_SET_OPTIMIZABLE_PARAMETERS [overload STK internal]
+%
+% See also: stk_get_optimizable_parameters
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2020 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +28,14 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function model = stk_set_optimizable_parameters (model, value)
 
-K = stk_covmat_noise (model.prior, varargin{:});
+% Model objects that *do* have some optimizable parameters must
+% overload this function.
+
+if ~ isempty (value)
+    stk_error (sprintf (['Model object of class %s have no ' ...
+        'optimizable parameters.'], class (model)), 'IncorrectArgument');
+end
 
 end % function
-
-%#ok<*INUSD,*STOUT>

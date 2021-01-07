@@ -1,8 +1,17 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_SET_OPTIMIZABLE_PARAMETERS [overload STK function, internal]
+%
+% INTERNAL FUNCTION WARNING:
+%
+%    This function is currently considered as internal.  STK users that
+%    wish to experiment with parameter classes can already overload it,
+%    but should be aware that API-breaking changes are likely to happen
+%    in future releases.
+%
+% See also: stk_get_optimizable_parameters
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +35,13 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function lm = stk_set_optimizable_parameters (lm, param)
 
-K = stk_covmat_noise (model.prior, varargin{:});
+% FIXME: Check input size and type
+
+assert ((lm.param_min <= param) && (param <= lm.param_max));
+
+lm.param = param;
+lm.angular_frequency = exp (param);
 
 end % function
-
-%#ok<*INUSD,*STOUT>

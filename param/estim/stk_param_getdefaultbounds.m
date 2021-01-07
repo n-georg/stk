@@ -12,11 +12,11 @@
 %    using one of the following two approaches:
 %
 %       a) if the covariance uses a dedicated class C for parameter values,
-%          the prefered approach is to imlement stk_param_getdefaultbounds for
-%          this class;
+%          the prefered approach is to implement stk_param_getdefaultbounds
+%          for this class;
 %
-%       b) otherwise, for a covariance function named mycov, simply provide a
-%          function named mycov_defaultbounds.
+%       b) otherwise, for a covariance function named mycov, simply provide
+%          a function named mycov_defaultbounds.
 
 % Copyright Notice
 %
@@ -48,7 +48,87 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function [lb, ub] = stk_param_getdefaultbounds (covariance_type, param0, xi, zi)
+function [lb, ub] = stk_param_getdefaultbounds (varargin)
+
+switch nargin
+    
+    case {0, 1, 2}
+        stk_error ('Not enough input arguments.', 'NotEnoughInputArgs');
+        
+    case 3  % The 'modern' syntax
+        [lb, ub] = stk_param_getdefaultbounds_3args (varargin{:});
+        
+    case 4  % Historical syntax for covariance parameters
+        [lb, ub] = stk_param_getdefaultbounds_4args (varargin{:});
+        
+    otherwise
+        stk_error ('Too many input arguments.', 'TooManyInputArgs');
+        
+end % switch
+
+end % function
+
+
+function [lb, ub] = stk_param_getdefaultbounds_3args (model, xi, zi)
+
+if isstruct (model)
+    
+    stk_assert_model_struct (model);
+    
+    % UGLY: Currently stk_param_getdefaultbounds return empty when there are no
+    %       bounds, which means that we have to work more before we can
+    %       concatenate...  Yuck.  This should be fixed.
+    
+    % Linear model
+    [lmparam_lb, lmparam_ub] = stk_param_getdefaultbounds (model.lm, xi, zi);
+    lmparam_size = length (stk_get_optimizable_parameters (model.lm));
+    [lmparam_lb, lmparam_ub] = fix_ (lmparam_lb, lmparam_ub, lmparam_size);
+    
+    % Covariance function
+    [covparam_lb, covparam_ub] = stk_param_getdefaultbounds (model.covariance_type, model.param, xi, zi);
+    covparam_size = length (stk_get_optimizable_parameters (model.param));
+    [covparam_lb, covparam_ub] = fix_ (covparam_lb, covparam_ub, covparam_size);
+    
+    % Noise model
+    [noiseparam_lb, noiseparam_ub] = stk_param_getdefaultbounds_lnv (model, model.lognoisevariance, xi, zi);
+    noiseparam_size = length (stk_get_optimizable_noise_parameters (model));
+    [noiseparam_lb, noiseparam_ub] = fix_ (noiseparam_lb, noiseparam_ub, noiseparam_size);
+    
+    lb = [lmparam_lb; covparam_lb; noiseparam_lb];
+    ub = [lmparam_ub; covparam_ub; noiseparam_ub];
+    
+elseif isa (model, 'function_handle')
+    
+    % Function handles can be used instead of (parameter-less) lm objects
+    lb = [];
+    ub = [];
+    
+else
+    
+    stk_error (sprintf (['stk_param_getdefaultbounds is not ' ...
+        'implemented for models of class %s.'], class (model)), ...
+        'NotImplemented');
+    
+end
+
+end % function
+
+
+function [lb, ub] = fix_ (lb, ub, p)
+
+if isempty (lb)
+    lb = - inf (p, 1);
+end
+
+if isempty (ub)
+    ub = inf (p, 1);
+end
+
+end % function
+
+
+function [lb, ub] = stk_param_getdefaultbounds_4args ...
+    (covariance_type, param0, xi, zi)
 
 if isobject (param0)
     
@@ -100,7 +180,7 @@ else
             
             nu_min = opts.nu_min_dimfun (dim);
             nu_max = opts.nu_max_dimfun (dim);
-
+            
             lognu_lb = min (log (nu_min), param0(2));
             lognu_ub = max (log (nu_max), param0(2));
             

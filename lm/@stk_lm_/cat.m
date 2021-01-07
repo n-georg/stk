@@ -1,8 +1,8 @@
-% STK_COVMAT_NOISE [STK internal]
+% CAT [overload base function]
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -26,10 +26,11 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, varargin)
+function varargout = cat (dim, varargin)  %#ok<STOUT,INUSD>
 
-K = stk_covmat_noise (model.prior, varargin{:});
+stk_error (['Arrays of linear model objects are not supported. ', ...
+    'Use cell arrays instead.'], 'IllegalOperation');
+
+% FIXME: Implement horizontal concatenation, which makes sense
 
 end % function
-
-%#ok<*INUSD,*STOUT>
