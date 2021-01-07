@@ -1,8 +1,8 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_PARAM_GETDEFAULTBOUNDS [overload STK function]
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2021 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -11,7 +11,7 @@
 %    This file is part of
 %
 %            STK: a Small (Matlab/Octave) Toolbox for Kriging
-%               (https://github.com/stk-kriging/stk/)
+%               (http://sourceforge.net/projects/kriging)
 %
 %    STK is free software: you can redistribute it and/or modify it under
 %    the terms of the GNU General Public License as published by the Free
@@ -26,11 +26,9 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, x1, x2, diff, pairwise)
+function [lb, ub] = stk_param_getdefaultbounds (lm, xi, zi)  %#ok<INUSD>
 
-stk_error (['Classes derived from stk_model_ must implement ' ...
-    'stk_covmat_noise.'], 'IncompleteClassImplementation');
+lb = lm.param_min;
+ub = lm.param_max;
 
 end % function
-
-%#ok<*INUSD,*STOUT>

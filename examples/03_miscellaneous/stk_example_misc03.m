@@ -1,8 +1,8 @@
-% STK_EXAMPLE_MISC03  How to deal with (known) seasonality
+% STK_EXAMPLE_MISC03  How to deal with a simple seasonality effect
 
 % Copyright Notice
 %
-%    Copyright (C) 2016 CentraleSupelec
+%    Copyright (C) 2016, 2021 CentraleSupelec
 %    Copyright (C) 2014 SUPELEC
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
@@ -35,8 +35,10 @@ stk_disp_examplewelcome
 t_obs = (0:0.05:12)';
 S_obs = sin (t_obs + 0.3) + 0.1 * randn (size (t_obs));
 
-stk_figure ('stk_example_misc03');  plot (t_obs, S_obs, 'k.');
+stk_figure ('stk_example_misc03');
+plot (t_obs, S_obs, 'k.', 'DisplayName', 'data');
 stk_labels ('month number t', 'sunspots S');
+stk_legend ();
 
 t = (0:0.01:30)';
 
@@ -54,13 +56,13 @@ model.lognoisevariance = nan;
     (model, t_obs, S_obs, param0, lnv0);
 
 % Carry out the kriging prediction
-S_posterior = stk_predict (model, t_obs, S_obs, t);
+S_post = stk_predict (model, t_obs, S_obs, t);
 
 % Display the result
-hold on;  plot (t, S_posterior.mean, 'r-');
+hold on;  plot (t, S_post.mean, 'r-', 'DisplayName', 'constant mean');
 
 
-%% Gaussian process model with seasonality
+%% Gaussian process model with (known) seasonality
 
 % Periodicity assumed to be known
 T0 = 2 * pi;
@@ -78,17 +80,57 @@ model2.lognoisevariance = nan;
     stk_param_estim (model2, t_obs, S_obs, param0, lnv0);
 
 % Carry out the kriging prediction
-S_posterior = stk_predict (model2, t_obs, S_obs, t);
+S_post = stk_predict (model2, t_obs, S_obs, t);
 
 % Display the result
-hold on;  plot (t, S_posterior.mean, 'g-');
+hold on;  plot (t, S_post.mean, 'g-', ...
+    'LineWidth', 3, 'DisplayName', 'known \omega');
+
+
+%% Gaussian process model with (partially unknown) seasonality
+
+% We assume that the period is unknown, but the number of harmonics
+% (equal to one) is known.
+
+% Initial guess and search interval for omega
+omega0 = 1.2;  % The true value is omega = 1.0
+omega_lims = [0.1; 5.0];
+
+% Construct a prior model with sinusoidal trend
+model3 = stk_model ('stk_materncov52_iso');
+model3.lm = stk_lm_sincos (omega0, omega_lims);
+model3.lognoisevariance = nan;
+
+% FIXME: Make it possible to include a constant term as well
+%        (sum of linear model objects !)
+
+% Initial guess for the parameters of the Matern covariance
+[param0, lnv0] = stk_param_init (model3, t_obs, S_obs);
+
+% NOTE: stk_param_init completely ignore the existing lm field
+%       and uses an stk_lm_constant term instead (FIXME ?)
+
+% FIXME: "old" [param, lnv] syntax, cf. stk_param_estim
+
+% Estimate the parameters  (NEW EXPERIMENTAL SYNTAX !!!)
+model3 = stk_param_estim_ (model3, ...
+    t_obs, S_obs, param0, lnv0, @stk_param_proflik);
+
+% Carry out the kriging prediction
+S_post = stk_predict (model3, t_obs, S_obs, t);
+
+% Display the result
+hold on;  plot (t, S_post.mean, 'b--', ...
+    'LineWidth', 2, 'DisplayName', 'unknown \omega');
+
+stk_legend ();
 
 
 %% Display models
 
 model
 model2
-
+model3
 
 %#ok<*NOPTS>
 

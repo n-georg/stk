@@ -1,8 +1,10 @@
-% STK_COVMAT_NOISE [STK internal]
+% STK_SET_OPTIMIZABLE_PARAMETERS [overload STK internal]
+%
+% See also: stk_get_optimizable_parameters
 
 % Copyright Notice
 %
-%    Copyright (C) 2019 CentraleSupelec
+%    Copyright (C) 2020 CentraleSupelec
 %
 %    Author:  Julien Bect  <julien.bect@centralesupelec.fr>
 
@@ -11,7 +13,7 @@
 %    This file is part of
 %
 %            STK: a Small (Matlab/Octave) Toolbox for Kriging
-%               (https://github.com/stk-kriging/stk/)
+%               (http://sourceforge.net/projects/kriging)
 %
 %    STK is free software: you can redistribute it and/or modify it under
 %    the terms of the GNU General Public License as published by the Free
@@ -26,11 +28,14 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function K = stk_covmat_noise (model, x1, x2, diff, pairwise)
+function model = stk_set_optimizable_parameters (model, value)
 
-stk_error (['Classes derived from stk_model_ must implement ' ...
-    'stk_covmat_noise.'], 'IncompleteClassImplementation');
+% Model objects that *do* have some optimizable parameters must
+% overload this function.
+
+if ~ isempty (value)
+    stk_error (sprintf (['Model object of class %s have no ' ...
+        'optimizable parameters.'], class (model)), 'IncorrectArgument');
+end
 
 end % function
-
-%#ok<*INUSD,*STOUT>

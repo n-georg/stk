@@ -10,6 +10,24 @@
 
 * `stk_example_misc06`: New example.
 
+## Parameter estimation criteria (3.0.0 ???)
+
+* `stk_param_relik.m`: the old syntax for computing the gradient of
+   the restricted likelihood function:
+
+        [C, COVPARAM_DIFF, LNV_DIFF] = stk_param_relik (...)
+
+  is deprecated.  Instead, use:
+
+        [C, C_GRAD] = crit (...)
+
+  to obtain the full gradient with respect to all optimizable
+  parameters of the model.  (Note the change of behaviour for the
+  syntax with two output arguments, if the model has optimizable
+  parameters in the noise model, for instance.)
+
+* `stk_param_proflik`: NEW
+
 -----
 
 

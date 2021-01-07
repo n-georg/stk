@@ -10,7 +10,7 @@
 
 % Copyright Notice
 %
-%    Copyright (C) 2017, 2018 CentraleSupelec
+%    Copyright (C) 2017, 2018, 2021 CentraleSupelec
 %    Copyright (C) 2017 LNE
 %
 %    Authors:  Remi Stroh   <remi.stroh@lne.fr>
@@ -39,13 +39,17 @@
 function value = stk_get_optimizable_model_parameters (model)
 
 stk_assert_model_struct (model);
+model = stk_model_fixlm (model);
 
-% Covariance parameters
+% Parameters of the linear model
+lmparam = stk_get_optimizable_parameters (model.lm);
+
+% Parameters of the covariance function
 covparam = stk_get_optimizable_parameters (model.param);
 
-% Noise parameters
+% Parameters of the noise parameters
 noiseparam = stk_get_optimizable_noise_parameters (model);
 
-value = [covparam; noiseparam];
+value = [lmparam; covparam; noiseparam];
    
 end % function

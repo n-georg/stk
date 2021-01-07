@@ -1,15 +1,14 @@
 % STK_PARAM_LOOMSE computes the Leave-One-Out criterion of a model given data
 %
-% CALL: [C, COVPARAM_DIFF, LNV_DIFF] = stk_param_loomse (MODEL, XI, ZI)
+% CALL: C = stk_param_loomse (MODEL, XI, ZI)
 %
-%   computes the value C of the leave-one-out mean square error criterion for
-%   the MODEL given the data (XI, ZI).
+%   computes the value C of the leave-one-out mean square error criterion
+%   for the MODEL given the data (XI, ZI).
 %
-% CALL: [C, COVPARAM_DIFF, LNV_DIFF] = stk_param_loomse (MODEL, XI, ZI)
+% CALL: [C, C_GRAD] = stk_param_loomse (MODEL, XI, ZI)
 %
-%   also returns the gradient COVPARAM_DIFF of C with respect to the parameters
-%   of the covariance function, and its derivative LNV_DIFF with respect to the
-%   logarithm of the noise variance.
+%   also returns the gradient C_GRAD of C with respect to all the
+%   optimizable parameters of the model.
 %
 % REFERENCE
 %
@@ -22,7 +21,7 @@
 
 % Copyright Notice
 %
-%    Copyright (C) 2018 CentraleSupelec
+%    Copyright (C) 2018, 2021 CentraleSupelec
 %    Copyright (C) 2018 LNE
 %
 %    Authors:  Remi Stroh   <remi.stroh@lne.fr>
@@ -48,7 +47,7 @@
 %    You should  have received a copy  of the GNU  General Public License
 %    along with STK.  If not, see <http://www.gnu.org/licenses/>.
 
-function [C, covparam_diff, noiseparam_diff] = stk_param_loomse (model, xi, zi)
+function [C, C_grad, C_grad_noiseparam] = stk_param_loomse (model, xi, zi)
 
 zi = double (zi);
 
@@ -57,12 +56,6 @@ n = size (xi, 1);
 if ~ isequal (size (zi), [n 1])
     stk_error (['zi must be a column vector, with the same' ...
         'same number of rows as x_obs.'], 'IncorrectSize');
-end
-
-if nargout >= 3
-    % Parameters of the noise variance function
-    noiseparam = stk_get_optimizable_noise_parameters (model);
-    noiseparam_size = length (noiseparam);
 end
 
 
@@ -93,32 +86,56 @@ C = raw_res' * raw_res / n;
 
 if nargout >= 2
     
-    % Get numerical parameter vector from parameter object
-    covparam = stk_get_optimizable_parameters (model.param);
-    covparam_size = length (covparam);
-    covparam_diff = zeros (covparam_size, 1);
+    % Gradient wrt parameters of the linear model
+    lmparam_size = length (stk_get_optimizable_parameters (model.lm));
+    C_grad_lmparam = zeros (lmparam_size, 1);
+    if lmparam_size > 0
+        stk_error ('Not implemented yet.', 'NotImplemented');
+        % FIXME: Implement!
+    end
     
+    % Gradient wrt parameters of the covariance function
+    covparam_size = length (stk_get_optimizable_parameters (model.param));
+    C_grad_covparam = zeros (covparam_size, 1);
     for diff = 1:covparam_size
         V = feval (model.covariance_type, model.param, xi, xi, diff);
         W = R * V * R;
-        covparam_diff(diff) = (2 * raw_res'./(n * dR')) * (diag(W) .* raw_res - W * zi);
+        C_grad_covparam(diff) = (2 * raw_res'./(n * dR')) * (diag(W) .* raw_res - W * zi);
     end
     
-    if nargout >= 3
-        
-        if noiseparam_size == 0
-            noiseparam_diff = [];
-        else
-            noiseparam_diff = zeros (noiseparam_size, 1);
-            for diff = 1:noiseparam_size
-                V = stk_covmat_noise (model, xi, [], diff);
-                W = R * V * R;
-                noiseparam_diff(diff) = (2 * raw_res'./(n * dR')) * (diag(W) .* raw_res - W * zi);
-            end
-        end
+    % Gradient wrt parameters of the noise model
+    noiseparam_size = length (stk_get_optimizable_noise_parameters (model));
+    C_grad_noiseparam = zeros (noiseparam_size, 1);
+    for diff = 1:noiseparam_size
+        V = stk_covmat_noise (model, xi, [], diff);
+        W = R * V * R;
+        C_grad_noiseparam(diff) = (2 * raw_res'./(n * dR')) * (diag(W) .* raw_res - W * zi);
     end
     
 end
+
+
+%% Construct full gradient (if needed)
+
+switch nargout
+    
+    case {0, 1}
+        % Nothing to do, the gradient was not requested
+        
+    case 2
+        % Recommended syntax, with the full gradient as the second output
+        C_grad = [C_grad_lmparam; C_grad_covparam; C_grad_noiseparam];
+        
+    case 3
+        % Old (deprecated) syntax, from a time where linear models were
+        % not allowed to have additional parameters
+        assert (isempty (C_grad_lmparam));
+        C_grad = C_grad_covparam;
+        
+    otherwise
+        stk_error ('Too many input arguments.', 'TooManyInputArgs');
+        
+end % switch
 
 end % function
 
@@ -151,7 +168,7 @@ end % function
 %! assert (stk_isequal_tolrel (C, C_ref));
 %! assert (abs (dC1(1)) < sqrt (eps))
 %! assert (stk_isequal_tolrel (dC1(2:end), [-0.0091 0.0167 -0.0277 0.3326]', TOL_REL));
-%! assert (isequal (dC2, []));
+%! assert (isequal (dC2, zeros (0, 1)));
 
 %!test  % with noise variance
 %! model.lognoisevariance = 2*log(0.1);
