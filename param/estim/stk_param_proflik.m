@@ -149,7 +149,7 @@ if nargout >= 2
         lm_ = model.lm;
         for diff = 1:lmparam_size
             [V, lm_] = stk_lm_diff (lm_, xi, diff);
-            C_grad_lmparam(diff) = - 2 * w' * V * beta;
+            C_grad_lmparam(diff) = - w' * V * beta;
         end
         if LMPRIOR
             % FIXME: Implement!
@@ -227,37 +227,37 @@ end % function
 %! model = stk_model('stk_materncov_aniso');
 %! model.param = log([SIGMA2; NU; 1/RHO1 * ones(DIM, 1)]);
 
-%!error [C, dC1, dC2] = stk_param_relik ();
-%!error [C, dC1, dC2] = stk_param_relik (model);
-%!error [C, dC1, dC2] = stk_param_relik (model, xi);
-%!test  [C, dC1, dC2] = stk_param_relik (model, xi, zi);
+%!error [C, dC1, dC2] = stk_param_proflik ();
+%!error [C, dC1, dC2] = stk_param_proflik (model);
+%!error [C, dC1, dC2] = stk_param_proflik (model, xi);
+%!test  [C, dC1, dC2] = stk_param_proflik (model, xi, zi);
 
-%!test
-%! TOL_REL = 0.01;
-%! assert (stk_isequal_tolrel (C, 21.6, TOL_REL));
-%! assert (stk_isequal_tolrel (dC1, [4.387 -0.1803 0.7917 0.1392 2.580]', TOL_REL));
-%! assert (isequal (dC2, zeros (0, 1)));
+% %!test
+% %! TOL_REL = 0.01;
+% %! assert (stk_isequal_tolrel (C, 21.6, TOL_REL));
+% %! assert (stk_isequal_tolrel (dC1, [4.387 -0.1803 0.7917 0.1392 2.580]', TOL_REL));
+% %! assert (isequal (dC2, zeros (0, 1)));
 
-%!shared xi, zi, model, TOL_REL
-%! xi = [-1 -.6 -.2 .2 .6 1]';
-%! zi = [-0.11 1.30 0.23 -1.14 0.36 -0.37]';
-%! model = stk_model ('stk_materncov_iso');
-%! model.param = log ([1.0 4.0 2.5]);
-%! model.lognoisevariance = log (0.01);
-%! TOL_REL = 0.01;
+% %!shared xi, zi, model, TOL_REL
+% %! xi = [-1 -.6 -.2 .2 .6 1]';
+% %! zi = [-0.11 1.30 0.23 -1.14 0.36 -0.37]';
+% %! model = stk_model ('stk_materncov_iso');
+% %! model.param = log ([1.0 4.0 2.5]);
+% %! model.lognoisevariance = log (0.01);
+% %! TOL_REL = 0.01;
 
-%!test  % Another simple 1D check
-%! [C, dC1, dC2] = stk_param_relik (model, xi, zi);
-%! assert (stk_isequal_tolrel (C, 6.327, TOL_REL));
-%! assert (stk_isequal_tolrel (dC1, [0.268 0.0149 -0.636]', TOL_REL));
-%! assert (stk_isequal_tolrel (dC2, -1.581e-04, TOL_REL));
+% %!test  % Another simple 1D check
+% %! [C, dC1, dC2] = stk_param_relik (model, xi, zi);
+% %! assert (stk_isequal_tolrel (C, 6.327, TOL_REL));
+% %! assert (stk_isequal_tolrel (dC1, [0.268 0.0149 -0.636]', TOL_REL));
+% %! assert (stk_isequal_tolrel (dC2, -1.581e-04, TOL_REL));
 
-%!test  % Same 1D test with simple kriging
-%! model.lm = stk_lm_null;
-%! [C, dC1, dC2] = stk_param_relik (model, xi, zi);
-%! assert (stk_isequal_tolrel (C, 7.475, TOL_REL));
-%! assert (stk_isequal_tolrel (dC1, [0.765 0.0238 -1.019]', TOL_REL));
-%! assert (stk_isequal_tolrel (dC2, 3.0517e-03, TOL_REL));
+% %!test  % Same 1D test with simple kriging
+% %! model.lm = stk_lm_null;
+% %! [C, dC1, dC2] = stk_param_relik (model, xi, zi);
+% %! assert (stk_isequal_tolrel (C, 7.475, TOL_REL));
+% %! assert (stk_isequal_tolrel (dC1, [0.765 0.0238 -1.019]', TOL_REL));
+% %! assert (stk_isequal_tolrel (dC2, 3.0517e-03, TOL_REL));
 
 %!test  % Check the gradient on a 2D test case
 %!
@@ -269,13 +269,15 @@ end % function
 %! DELTA = 1e-6;
 %!
 %! model = stk_model ('stk_materncov52_iso', DIM);
+%! model.param = [1 1];
+%!
 %! xi = stk_sampling_halton_rr2 (NI, DIM, BOX);
 %! zi = stk_feval (f, xi);
 %!
-%! model.param = [1 1];
-%! [C1 dC] = stk_param_relik (model, xi, zi);
-%!
-%! model.param = model.param + DELTA * [0 1];
-%! C2 = stk_param_relik (model, xi, zi);
-%!
-%! assert (stk_isequal_tolrel (dC(2), (C2 - C1) / DELTA, TOL_REL));
+%! for range = [0.3 2 10]
+%!     model.param(2) = - log (range);
+%!     for diff = 1:2
+%!         assert (stk_test_critgrad ...
+%!             (@stk_param_proflik, model, xi, zi, diff, 1e-6));
+%!     end
+%! end
