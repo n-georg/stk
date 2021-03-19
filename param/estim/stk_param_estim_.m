@@ -103,7 +103,7 @@ select = [lmparam_select; covparam_select; noiseparam_select];
 % FIXME: Clarify this confusing situation...
 
 % Call optimization routine
-if nargout > 2
+if nargout >= 2
     [model_opt, info] = stk_param_estim_optim ...
         (model, xi, zi, criterion, select);
 else
