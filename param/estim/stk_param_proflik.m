@@ -100,9 +100,12 @@ zi_tilde = linsolve (U, zi, UT_TRANSA);
 
 if ~ simple_kriging
     P_tilde = linsolve (U, P, UT_TRANSA);
-    beta = (P_tilde' * P_tilde) \ (P_tilde' * zi_tilde);
+    beta = P_tilde \ zi_tilde;
     % yi = zi - P * beta;
     yi_tilde = zi_tilde - P_tilde * beta;
+    % FIXME: Lack of uniqueness of beta should be detected, and warned
+    % against if the computation of the gradient is requested.  (It is not
+    % a problem if only the value of the profile likelihood is needed.)
 else
     yi_tilde = zi_tilde;
 end
