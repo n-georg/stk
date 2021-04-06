@@ -79,7 +79,7 @@ if crit_opt < crit0
 else
     s1 = 'Something went wrong during the optimization';
     s2 = sprintf ('crit0 = %f,  crit_opt = %f:  crit0 < crit_opt', crit0, crit_opt);
-    warning (sprintf ('%s\n%s\n', s1, s2));  % FIXME: warning id
+    warning ('STK:stk_param_estim_optim:NoImprovement', sprintf ('%s\n%s\n', s1, s2));
     model_opt = model0;
 end
 
