@@ -38,17 +38,24 @@
 
 function logpdf = stk_distrib_logpdf (distrib, z)
 
-delta = z - distrib.mean;
+if isfield(distrib, 'HasCustomPriorDistribution')
+    
+        logpdf = distrib.eval_logpdf_prior(z);
+        
+else
+    
+    delta = z - distrib.mean;
 
-if isfield (distrib, 'invcov')
-    
-    % We assume (but do not check) that .var is absent or compatible with invcov...
-    
-    logpdf = - 0.5 * (delta' * distrib.invcov * delta);
-    
-else  % assume isfield (distrib, 'var')
-    
-    logpdf = - 0.5 * (delta' * (distrib.var \ delta));
+    if isfield (distrib, 'invcov')
+
+        % We assume (but do not check) that .var is absent or compatible with invcov...
+
+        logpdf = - 0.5 * (delta' * distrib.invcov * delta);
+
+    else  % assume isfield (distrib, 'var')
+
+        logpdf = - 0.5 * (delta' * (distrib.var \ delta));
+    end
     
 end
 
